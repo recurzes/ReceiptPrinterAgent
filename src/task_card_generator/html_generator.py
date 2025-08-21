@@ -2,6 +2,8 @@
 
 import tempfile
 from datetime import datetime
+from ..util.constants import *
+from ..util.common import *
 
 try:
     import imgkit
@@ -75,7 +77,7 @@ def create_task_html(task):
             body {{
                 font-family: 'Segoe UI', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Apple Color Emoji', 'Noto Color Emoji', Arial, sans-serif;
                 background-color: white;
-                width: 576px;
+                width: {PRINTER_WIDTH_48MM}px;
                 padding: 0;
                 margin: 0;
             }}
@@ -202,21 +204,17 @@ def html_to_image_imgkit(html_content):
         
         # Configure options for thermal printer size
         options = {
-            'width': 576,  # 72mm thermal printer width
+            'width': PRINTER_WIDTH_48MM,  # 72mm thermal printer width
             'disable-smart-width': '',
             'encoding': 'UTF-8',
             'disable-local-file-access': '',
-            'crop-w': 576,  # Crop to exact width
+            'crop-w': PRINTER_WIDTH_48MM,  # Crop to exact width
         }
         
         # Try to configure wkhtmltopdf path for Windows
         config = None
         import os
-        possible_paths = [
-            r'C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe',
-            r'C:\Program Files (x86)\wkhtmltopdf\bin\wkhtmltoimage.exe',
-            r'C:\wkhtmltopdf\bin\wkhtmltoimage.exe'
-        ]
+        possible_paths = get_wkhtml_path_by_system()
         
         for path in possible_paths:
             if os.path.exists(path):

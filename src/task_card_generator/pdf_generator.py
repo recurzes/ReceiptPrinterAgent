@@ -2,6 +2,7 @@
 
 import tempfile
 from datetime import datetime
+from src.util.common import *
 
 from .config import (
     REPORTLAB_AVAILABLE,
@@ -22,11 +23,8 @@ if REPORTLAB_AVAILABLE:
     
     # Try to register Windows emoji fonts
     emoji_font_registered = False
-    for font_name, font_path in [
-        ("SegoeUIEmoji", "C:/Windows/Fonts/seguiemj.ttf"),
-        ("SegoeUIEmoji", "C:/Windows/Fonts/segoeuiemoji.ttf"),
-        ("SegoeUISymbol", "C:/Windows/Fonts/seguisym.ttf"),
-    ]:
+    font_name_and_font_path = get_font_name_and_font_path()
+    for font_name, font_path in font_name_and_font_path:
         try:
             if os.path.exists(font_path):
                 pdfmetrics.registerFont(TTFont(font_name, font_path))
@@ -106,6 +104,12 @@ def create_task_pdf(task_data):
             bolt_style.fontName = "SegoeUIEmoji"
         elif emoji_font_registered and "SegoeUISymbol" in pdfmetrics.getRegisteredFontNames():
             bolt_style.fontName = "SegoeUISymbol"
+        elif emoji_font_registered and "NotoSans" in pdfmetrics.getRegisteredFontNames():
+            bolt_style.fontName = "NotoSans"
+        elif emoji_font_registered and "NotoSansEmoji" in pdfmetrics.getRegisteredFontNames():
+            bolt_style.fontName = "NotoSansEmoji"
+        
+        
         
         if task_data["priority"].upper() == "HIGH":
             # Three lightning bolt emojis for high priority

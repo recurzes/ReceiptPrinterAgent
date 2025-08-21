@@ -14,33 +14,34 @@ def main():
     print("*" * 50)
 
     # Get user task description
-    print("\nDescribe the task you need to complete:")
-    print("-" * 40)
-    task_description = input(">> Enter task description: ")
+    # print("\nDescribe the task you need to complete:")
+    # print("-" * 40)
+    # task_description = input(">> Enter task description: ")
 
-    if not task_description.strip():
-        print("ERROR: Please enter a valid task description!")
-        return
+    # if not task_description.strip():
+    #     print("ERROR: Please enter a valid task description!")
+    #     return
 
-    # Get AI response
-    print("\nProcessing with AI...")
-    ai_response = get_task_from_ai(task_description)
+    # # Get AI response
+    # print("\nProcessing with AI...")
+    # ai_response = get_task_from_ai(task_description)
 
-    if not ai_response or ai_response.startswith("Error"):
-        print(f"ERROR: {ai_response or 'Failed to get response'}")
-        return
+    # if not ai_response or ai_response.startswith("Error"):
+    #     print(f"ERROR: {ai_response or 'Failed to get response'}")
+    #     return
 
     # Parse AI response
-    task_data = parse_ai_response(ai_response)
+    # task_data = parse_ai_response(ai_response)
 
-    print(f"\nGenerated Task: {task_data['title']}")
-    print(f"Priority: {task_data['priority']}")
+    # print(f"\nGenerated Task: {task_data['title']}")
+    # print(f"Priority: {task_data['priority']}")
 
     # Create PDF for viewing
-    pdf_path = create_task_pdf(task_data)
+    # pdf_path = create_task_pdf(task_data)
 
     # Create image for printing
-    image_path = create_task_image(task_data)
+    # image_path = create_task_image(task_data, save_temp=False)
+    image_path = "/tmp/tmpjvzufbm7.png"
 
     if image_path:
         # Print to thermal printer
@@ -51,8 +52,8 @@ def main():
 
     print("\n" + "=" * 50)
     print("TASK CARD GENERATION COMPLETE!")
-    if pdf_path:
-        print(f"PDF saved: {pdf_path}")
+    # if pdf_path:
+    #     print(f"PDF saved: {pdf_path}")
     print("=" * 50)
 
 

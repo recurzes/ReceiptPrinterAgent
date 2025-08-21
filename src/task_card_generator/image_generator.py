@@ -3,12 +3,41 @@
 import tempfile
 import textwrap
 from datetime import datetime
+import platform
 
 from .config import PIL_AVAILABLE, Image, ImageDraw, ImageFont
+from ..util.constants import *
 
+def get_emoji_font(size=150):
+    system = platform.system()
+    
+    if system == "Windows":
+        font_paths = [
+            "C:/Windows/Fonts/seguiemj.ttf",  # Segoe UI Emoji
+            "C:/Windows/Fonts/segoeuiemoji.ttf",  # Alternative name
+            "C:/Windows/Fonts/seguisym.ttf",  # Segoe UI Symbol
+            "C:/Windows/Fonts/arial.ttf",  # Arial fallback
+        ]
+    elif system == "Linux":
+        font_paths = [
+            "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        ]
+    elif system == "Darwin":
+        # Add your own shit I use linux
+        pass
+    else:
+        font_paths = []
+        
+    for path in font_paths:
+        try:
+            return ImageFont.truetype(path, size)
+        except:
+            continue
+        
+    return ImageFont.load_default()
 
-
-def create_task_image(task_data):
+def create_task_image(task_data, save_temp=True):
     """Create task card image with hand-drawn lightning bolts."""
     if not PIL_AVAILABLE:
         print("PIL not available - skipping image generation")
@@ -16,7 +45,7 @@ def create_task_image(task_data):
 
     try:
         # Image dimensions (optimized for thermal printer)
-        width = 576  # 72mm thermal printer width
+        width = PRINTER_WIDTH_48MM  # 72mm thermal printer width
         
         # Load fonts first to calculate sizes
         try:
@@ -29,9 +58,9 @@ def create_task_image(task_data):
         # Calculate content height
         title_lines = textwrap.wrap(task_data["title"], width=15)
         title_height = len(title_lines) * 95 + 10
-        emoji_height = 150
-        date_height = 40
-        total_padding = 30
+        emoji_height = EMOJI_HEIGHT
+        date_height = DATE_HEIGHT
+        total_padding = TOTAL_PADDING
         
         height = title_height + emoji_height + date_height + total_padding
 
@@ -40,36 +69,35 @@ def create_task_image(task_data):
         draw = ImageDraw.Draw(img)
 
         # Draw title at the top
-        title_y = 10
         
         for i, line in enumerate(title_lines):
             line_bbox = draw.textbbox((0, 0), line, font=title_font)
             line_width = line_bbox[2] - line_bbox[0]
             line_x = (width - line_width) // 2
-            draw.text((line_x, title_y + i * 95), line, fill="black", font=title_font)
+            draw.text((line_x, TITLE_Y + i * 95), line, fill="black", font=title_font)
 
         # Draw lightning bolt emoji after title
-        emoji_y = title_y + len(title_lines) * 95 + 20
+        emoji_y = TITLE_Y + len(title_lines) * 95 + 20
         
         # Try to use a font that supports emojis
-        emoji_font = None
-        font_paths = [
-            "C:/Windows/Fonts/seguiemj.ttf",  # Segoe UI Emoji
-            "C:/Windows/Fonts/segoeuiemoji.ttf",  # Alternative name
-            "C:/Windows/Fonts/seguisym.ttf",  # Segoe UI Symbol
-            "C:/Windows/Fonts/arial.ttf",  # Arial fallback
-        ]
+        emoji_font = get_emoji_font(size=150)
+        # font_paths = [
+        #     "C:/Windows/Fonts/seguiemj.ttf",  # Segoe UI Emoji
+        #     "C:/Windows/Fonts/segoeuiemoji.ttf",  # Alternative name
+        #     "C:/Windows/Fonts/seguisym.ttf",  # Segoe UI Symbol
+        #     "C:/Windows/Fonts/arial.ttf",  # Arial fallback
+        # ]
         
-        for font_path in font_paths:
-            try:
-                emoji_font = ImageFont.truetype(font_path, 150)
-                break
-            except:
-                continue
+        # for font_path in font_paths:
+        #     try:
+        #         emoji_font = ImageFont.truetype(font_path, 150)
+        #         break
+        #     except:
+        #         continue
         
-        # If no font found, use default
-        if emoji_font is None:
-            emoji_font = ImageFont.load_default()
+        # # If no font found, use default
+        # if emoji_font is None:
+        #     emoji_font = ImageFont.load_default()
         
         use_fallback = False
         
@@ -88,13 +116,12 @@ def create_task_image(task_data):
 
         # Draw due date below emoji
         date_y = emoji_y + 100
-        due_date = datetime.now().strftime("%B %d")
+        day = int(datetime.now().strftime("%d"))
         # Add ordinal suffix
         day = int(datetime.now().strftime("%d"))
-        if 4 <= day <= 20 or 24 <= day <= 30:
-            suffix = "th"
-        else:
-            suffix = ["st", "nd", "rd"][day % 10 - 1]
+        suffix = "th" if 4 <= day <= 20 or 24 <= day <= 30 else ["st", "nd", "rd"][day % 10 - 1]
+        due_date_text = f"{datetime.now().strftime('%B %d')}{suffix}"
+        
         
         due_date_text = f"{datetime.now().strftime('%B %d')}{suffix}"
         date_bbox = draw.textbbox((0, 0), due_date_text, font=date_font)
@@ -103,12 +130,16 @@ def create_task_image(task_data):
         draw.text((date_x, date_y), due_date_text, fill="black", font=date_font)
 
         # Save to temporary file
-        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
-        img.save(temp_file.name, "PNG")
-        temp_file.close()
+        if save_temp:
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
+            img.save(temp_file.name, "PNG")
+            temp_file.close()
 
-        print(f"Task card image created: {temp_file.name}")
-        return temp_file.name
+            print(f"Task card image created: {temp_file.name}")
+            return temp_file.name
+        else:
+            print("Task card image created")
+            return img
 
     except Exception as e:
         print(f"Error creating task card image: {str(e)}")

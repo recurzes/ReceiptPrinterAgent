@@ -10,6 +10,7 @@ from src.task_card_generator import (
     parse_ai_response,
     print_to_thermal_printer,
 )
+from src.util.constants import *
 from src.task_card_generator.html_generator import create_task_html_image
 
 # Load environment variables
@@ -18,10 +19,10 @@ load_dotenv()
 
 def main():
     """Main CLI entry point for task generation."""
-    print("=" * 50)
+    print("=" * EQUAL_COUNT)
     print("AI TASK GENERATOR")
     print("Turn your thoughts into actionable tasks")
-    print("=" * 50)
+    print("=" * EQUAL_COUNT)
 
     # Get user task description
     print("\nDescribe the task you need to complete:")
@@ -73,9 +74,9 @@ def main():
     else:
         print("   ❌ Could not create image")
 
-    print("\n" + "=" * 50)
+    print("\n" + "=" * EQUAL_COUNT)
     print("Task generation complete!")
-    print("=" * 50)
+    print("=" * EQUAL_COUNT)
 
 
 if __name__ == "__main__":

@@ -1,13 +1,16 @@
 """Thermal printer functionality."""
 
-from escpos.printer import Win32Raw
+from escpos.printer import Win32Raw, Usb
+import platform
+
+from src.util.common import get_printer_type
 
 
 def print_to_thermal_printer(image_path):
     """Print image to thermal printer."""
     try:
         # Initialize printer
-        printer = Win32Raw("RONGTA 80mm Series Printer")
+        printer = get_printer_type()
 
         # Print the image
         printer.image(image_path, impl="bitImageColumn", center=True)
